@@ -1,0 +1,31 @@
+## App
+
+Ctrl mode
+při zmáčknutí ctrl se zapne, při Release se vypne
+Pokud je Ctrl mode zapnutý, vykresluji čáru tečkovaně
+
+
+## Canvas
+
+musím přidat list tečkovaných čar
+
+
+## Dotted line rasterizer
+
+vytvořit
+
+---
+
+SAMOSTATNÁ PRÁCE PRO TŘETÍ HODINU
+
+Pomocí klácesy SHIFT kreslit pouze zarovnané úsečky. Tzn. pouze vodorovná přímka, svyslá, a nebo diagonála.
+
+(pokud budu držet CTRL bude se mi tato zarovnan přímka také kreslit tečkovaně)
+
+Pokud budete stíhat, tak jako další část bude udělat nový režim na vykreslování polygonu
+- pomocí klácesy změním mod na vykreslování poligonu
+- poligon má jednotlivé body, které se vždy spojí ve stejném pořadí ve kterém byli zadány
+(minimum pro vykreslení polygonu jsou tři body, které nám dají trojúhelník, čtyři dají čtvere čtyřúhelník atd.)
+
+
+
