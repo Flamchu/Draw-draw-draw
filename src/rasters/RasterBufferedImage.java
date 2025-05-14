@@ -26,19 +26,34 @@ public class RasterBufferedImage implements Raster {
 
     @Override
     public int getPixel(int x, int y) {
-        return img.getRGB(x, y);
+        if (x >= 0 && x < img.getWidth() && y >= 0 && y < img.getHeight()) {
+            return img.getRGB(x, y);
+        }
+        return 0;
     }
 
     @Override
     public void setPixel(int x, int y, int color) {
-        img.setRGB(x, y, color);
+        if (x >= 0 && x < img.getWidth() && y >= 0 && y < img.getHeight()) {
+            img.setRGB(x, y, color);
+        } else {
+            System.out.printf("Pixel out of bounds: (%d, %d)%n", x, y);
+        }
     }
 
     @Override
     public void clear() {
         Graphics g = img.getGraphics();
         g.setColor(new Color(color));
-        g.clearRect(0, 0, img.getWidth(), img.getHeight());
+        g.fillRect(0, 0, img.getWidth(), img.getHeight());
+    }
+
+    @Override
+    public void copyFrom(Raster source) {
+        BufferedImage sourceImg = ((RasterBufferedImage)source).getImg();
+        Graphics g = img.getGraphics();
+        g.drawImage(sourceImg, 0, 0, null);
+        g.dispose();
     }
 
     @Override

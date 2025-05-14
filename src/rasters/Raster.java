@@ -53,6 +53,12 @@ public interface Raster {
      * @param color
      *            pixel color
      */
+
+    /**
+     * Copies all pixels from another raster
+     */
+    void copyFrom(Raster source);
+
     void setPixel(int x, int y, int color);
 
     Graphics getGraphics();

@@ -4,31 +4,33 @@ import models.Line;
 import models.LineCanvas;
 import rasters.Raster;
 
+import java.util.ArrayList;
+
 public class LineCanvasRasterizer {
-
-    private Raster raster;
-
-    private Rasterizer lineRasterizer;
-    private Rasterizer dottedLineRasterizer;
+    private final Raster raster;
+    private final LineRasterizerTrivial lineRasterizer;
 
     public LineCanvasRasterizer(Raster raster) {
         this.raster = raster;
+        this.lineRasterizer = new LineRasterizerTrivial(raster);
+    }
 
-        lineRasterizer = new LineRasterizerTrivial(raster);
-        dottedLineRasterizer = new DottedLineRasterizerTrivial(raster);
+    public void setLineWidth(int width) {
+        lineRasterizer.setLineWidth(width);
     }
 
     public void rasterizeCanvas(LineCanvas canvas) {
-        lineRasterizer.rasterizeArray(canvas.getLines());
-        dottedLineRasterizer.rasterizeArray(canvas.getDottedLines());
+        // Draw all lines
+        for (Line line : canvas.getLines()) {
+            if (line.getPoint1() != null && line.getPoint2() != null) {
+                lineRasterizer.rasterize(line);
+            }
+        }
     }
 
     public void rasterizeLine(Line line) {
-        lineRasterizer.rasterize(line);
+        if (line != null && line.getPoint1() != null && line.getPoint2() != null) {
+            lineRasterizer.rasterize(line);
+        }
     }
-
-    public void rasterizeDottedLine(Line line) {
-        dottedLineRasterizer.rasterize(line);
-    }
-
 }
