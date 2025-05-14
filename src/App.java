@@ -23,6 +23,7 @@ public class App {
     private LineCanvas canvas;
     private Polygon polygon;
     private PolygonRasterizer polygonRasterizer;
+    private Color backgroundColor;
     private boolean shiftMode = false;
     private boolean polygonMode = false;
     private boolean fillMode = false;
@@ -30,6 +31,7 @@ public class App {
     private boolean triangleMode = false;
     private boolean circleMode = false;
     private boolean brushMode = false;
+    private boolean eraserMode = false;
     private Point shapeStartPoint;
     private Toolbar toolbar;
     private FloodFiller floodFiller;
@@ -39,8 +41,8 @@ public class App {
         SwingUtilities.invokeLater(() -> new App(800, 600).start());
     }
 
-    public void clear(int color) {
-        raster.setClearColor(color);
+    public void clear(Color color) {
+        raster.setClearColor(color.getRGB());
         raster.clear();
     }
 
@@ -49,7 +51,8 @@ public class App {
     }
 
     public void start() {
-        clear(0xaaaaaa);
+        backgroundColor = new Color(0xaaaaaa);
+        clear(backgroundColor);
         panel.repaint();
     }
 
@@ -138,6 +141,12 @@ public class App {
                 toolbar.setActiveTool("FILL");
                 break;
 
+            case "TOOL_ERASER":
+                resetModes();
+                eraserMode = true;
+                toolbar.setActiveTool("ERASER");
+                break;
+
             case "UNDO":
                 if (!canvas.getLines().isEmpty()) {
                     canvas.getLines().remove(canvas.getLines().size() - 1);
@@ -194,6 +203,8 @@ public class App {
         triangleMode = false;
         circleMode = false;
         brushMode = false;
+        eraserMode = false;
+        lastBrushPoint = null;
     }
 
     private void createAdapters() {
@@ -212,11 +223,12 @@ public class App {
                         polygonRasterizer.rasterize(polygon, toolbar.getSelectedColor(), toolbar.getLineStyle());
                         panel.repaint();
                     }
-                } else if (brushMode) {
+                } else if (brushMode || eraserMode) {
                     lastBrushPoint = new Point(e.getX(), e.getY());
                     raster.startPreview();
                     previewRaster.copyFrom(baseRaster);
-                    raster.setPixel(e.getX(), e.getY(), toolbar.getSelectedColor().getRGB());
+                    Color color = eraserMode ? backgroundColor : toolbar.getSelectedColor();
+                    raster.setPixel(e.getX(), e.getY(), color.getRGB());
                     panel.repaint();
                 } else {
                     point = new Point(e.getX(), e.getY());
@@ -228,7 +240,7 @@ public class App {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (brushMode) {
+                if (brushMode || eraserMode) {
                     raster.endPreview();
                     panel.repaint();
                 } else if (rectangleMode || triangleMode || circleMode) {
@@ -260,11 +272,11 @@ public class App {
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (brushMode) {
+                if (brushMode || eraserMode) {
                     Point currentPoint = new Point(e.getX(), e.getY());
                     if (lastBrushPoint != null) {
-                        Line line = new Line(lastBrushPoint, currentPoint,
-                                toolbar.getSelectedColor(), LineStyle.SOLID);
+                        Color color = eraserMode ? backgroundColor : toolbar.getSelectedColor();
+                        Line line = new Line(lastBrushPoint, currentPoint, color, LineStyle.SOLID);
                         rasterizer.setLineWidth(toolbar.getLineWidth());
                         rasterizer.rasterizeLine(line);
                         panel.repaint();

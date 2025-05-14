@@ -14,6 +14,7 @@ public class Toolbar {
     private final JCheckBoxMenuItem triangleItem;
     private final JCheckBoxMenuItem circleItem;
     private final JCheckBoxMenuItem brushItem;
+    private final JCheckBoxMenuItem eraserItem;
     private final JSlider widthSlider;
     private JComboBox<String> styleComboBox;
 
@@ -145,6 +146,12 @@ public class Toolbar {
         menuBar.add(toolsMenu);
         menuBar.add(colorMenu);
         menuBar.add(settingsMenu);
+
+        eraserItem = new JCheckBoxMenuItem("Eraser Tool");
+        toolsGroup.add(eraserItem);
+        eraserItem.setActionCommand("TOOL_ERASER");
+        eraserItem.addActionListener(actionListener);
+        toolsMenu.add(eraserItem);
     }
 
     private void createStyleComboBox() {
