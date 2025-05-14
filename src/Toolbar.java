@@ -15,6 +15,7 @@ public class Toolbar {
     private final JCheckBoxMenuItem circleItem;
     private final JCheckBoxMenuItem brushItem;
     private final JCheckBoxMenuItem eraserItem;
+    private final JCheckBoxMenuItem selectItem;
     private final JSlider widthSlider;
     private JComboBox<String> styleComboBox;
 
@@ -152,6 +153,12 @@ public class Toolbar {
         eraserItem.setActionCommand("TOOL_ERASER");
         eraserItem.addActionListener(actionListener);
         toolsMenu.add(eraserItem);
+
+        selectItem = new JCheckBoxMenuItem("Selection Tool");
+        toolsGroup.add(selectItem);
+        selectItem.setActionCommand("TOOL_SELECT");
+        selectItem.addActionListener(actionListener);
+        toolsMenu.add(selectItem);
     }
 
     private void createStyleComboBox() {
@@ -226,6 +233,7 @@ public class Toolbar {
     }
 
     public void setActiveTool(String tool) {
+        selectItem.setSelected(false);
         lineItem.setSelected(false);
         polygonItem.setSelected(false);
         fillItem.setSelected(false);
@@ -235,6 +243,9 @@ public class Toolbar {
         brushItem.setSelected(false);
 
         switch (tool) {
+            case "SELECT":
+                selectItem.setSelected(true);
+                break;
             case "LINE":
                 lineItem.setSelected(true);
                 break;
