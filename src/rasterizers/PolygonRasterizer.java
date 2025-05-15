@@ -13,13 +13,13 @@ public class PolygonRasterizer {
     private final LineRasterizerTrivial lineRasterizer;
     private final LineCanvasRasterizer lineCanvasRasterizer;
 
-    // Initialize with both rasterizers
+    // initialize with both rasterizers
     public PolygonRasterizer(Raster raster, LineCanvasRasterizer lineCanvasRasterizer) {
         this.lineRasterizer = new LineRasterizerTrivial(raster);
         this.lineCanvasRasterizer = lineCanvasRasterizer;
     }
 
-    // Draw polygon outline using LineCanvasRasterizer with given color, style, and width
+    // draw polygon outline using LineCanvasRasterizer with given color, style, and width
     public void rasterize(Polygon polygon, Color color, LineStyle style, int lineWidth) {
         if (lineCanvasRasterizer == null) {
             throw new IllegalStateException("LineCanvasRasterizer is not initialized.");
@@ -37,7 +37,7 @@ public class PolygonRasterizer {
         }
     }
 
-    // Point-in-polygon test using ray casting algorithm
+    // point-in-polygon test using ray casting algorithm
     public boolean isPointInsidePolygon(Polygon polygon, Point point) {
         List<Point> points = polygon.getPoints();
         int size = points.size();
@@ -51,12 +51,12 @@ public class PolygonRasterizer {
             int xj = points.get(j).getX();
             int yj = points.get(j).getY();
 
-            // Point lies exactly on a vertex
+            // point lies exactly on a vertex
             if ((xi == x && yi == y) || (xj == x && yj == y)) {
                 return true;
             }
 
-            // Ray-casting logic
+            // ray-casting logic
             boolean intersect = ((yi > y) != (yj > y)) &&
                     (x < (xj - xi) * (y - yi) / (double)(yj - yi) + xi);
             if (intersect) {
