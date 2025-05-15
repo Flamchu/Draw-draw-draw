@@ -1,30 +1,34 @@
 import models.LineStyle;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.event.*;
 
 public class Toolbar {
+    // main menu bar component
     private final JMenuBar menuBar;
-    private final JCheckBoxMenuItem lineItem;
-    private final JCheckBoxMenuItem polygonItem;
-    private final JCheckBoxMenuItem fillItem;
-    private final JCheckBoxMenuItem rectangleItem;
-    private final JCheckBoxMenuItem triangleItem;
-    private final JCheckBoxMenuItem circleItem;
-    private final JCheckBoxMenuItem brushItem;
-    private final JCheckBoxMenuItem eraserItem;
-    private final JCheckBoxMenuItem selectItem;
-    private final JSlider widthSlider;
-    private JComboBox<String> styleComboBox;
 
+    // tool selection menu items
+    private final JCheckBoxMenuItem lineItem = new JCheckBoxMenuItem("Line Tool", true);
+    private final JCheckBoxMenuItem polygonItem = new JCheckBoxMenuItem("Polygon Tool");
+    private final JCheckBoxMenuItem fillItem = new JCheckBoxMenuItem("Fill Tool");
+    private final JCheckBoxMenuItem rectangleItem = new JCheckBoxMenuItem("Rectangle Tool");
+    private final JCheckBoxMenuItem triangleItem = new JCheckBoxMenuItem("Triangle Tool");
+    private final JCheckBoxMenuItem circleItem = new JCheckBoxMenuItem("Circle Tool");
+    private final JCheckBoxMenuItem brushItem = new JCheckBoxMenuItem("Brush Tool");
+    private final JCheckBoxMenuItem eraserItem = new JCheckBoxMenuItem("Eraser Tool");
+    private final JCheckBoxMenuItem selectItem = new JCheckBoxMenuItem("Selection Tool");
+
+    // drawing settings components
+    private final JSlider widthSlider;
+    private final JComboBox<String> styleComboBox;
+
+    // current drawing settings
     private Color selectedColor = Color.WHITE;
     private int lineWidth = 1;
-    private boolean dottedLine = false;
     private ActionListener settingsChangeListener;
-    private LineStyle lineStyle = LineStyle.SOLID;
 
+    // available color palette
     private final Color[] colorPalette = {
             Color.WHITE,
             Color.RED,
@@ -34,37 +38,69 @@ public class Toolbar {
             Color.MAGENTA
     };
 
+    // initialize toolbar with action listener
     public Toolbar(ActionListener actionListener) {
         menuBar = new JMenuBar();
 
-        // File menu
+        // setup settings components
+        widthSlider = new JSlider(1, 20, lineWidth);
+        styleComboBox = new JComboBox<>(new String[]{"Solid", "Dotted", "Dashed"});
+
+        // build all menu sections
+        buildFileMenu(actionListener);
+        buildEditMenu(actionListener);
+        buildToolsMenu(actionListener);
+        buildColorMenu();
+        buildSettingsMenu();
+    }
+
+    // build file menu with basic operations
+    private void buildFileMenu(ActionListener actionListener) {
         JMenu fileMenu = new JMenu("File");
         addMenuItem(fileMenu, "New", "NEW", actionListener);
         addMenuItem(fileMenu, "Open", "OPEN", actionListener);
         addMenuItem(fileMenu, "Save", "SAVE", actionListener);
         fileMenu.addSeparator();
         addMenuItem(fileMenu, "Exit", "EXIT", actionListener);
+        menuBar.add(fileMenu);
+    }
 
-        // Edit menu
+    // build edit menu with undo/clear
+    private void buildEditMenu(ActionListener actionListener) {
         JMenu editMenu = new JMenu("Edit");
         addMenuItem(editMenu, "Undo", "UNDO", actionListener);
         editMenu.addSeparator();
         addMenuItem(editMenu, "Clear Canvas", "CLEAR", actionListener);
+        menuBar.add(editMenu);
+    }
 
-        // Tools menu
+    // build tools menu with all drawing tools
+    private void buildToolsMenu(ActionListener actionListener) {
         JMenu toolsMenu = new JMenu("Tools");
-        lineItem = new JCheckBoxMenuItem("Line Tool", true);
-        polygonItem = new JCheckBoxMenuItem("Polygon Tool");
-        fillItem = new JCheckBoxMenuItem("Fill Tool");
-        rectangleItem = new JCheckBoxMenuItem("Rectangle Tool");
-        triangleItem = new JCheckBoxMenuItem("Triangle Tool");
-        circleItem = new JCheckBoxMenuItem("Circle Tool");
-        brushItem = new JCheckBoxMenuItem("Brush Tool");
 
-        JMenu lineStyleMenu = new JMenu("Line Style");
+        // configure tool items
+        lineItem.setActionCommand("TOOL_LINE");
+        polygonItem.setActionCommand("TOOL_POLYGON");
+        fillItem.setActionCommand("TOOL_FILL");
+        rectangleItem.setActionCommand("TOOL_RECTANGLE");
+        triangleItem.setActionCommand("TOOL_TRIANGLE");
+        circleItem.setActionCommand("TOOL_CIRCLE");
+        brushItem.setActionCommand("TOOL_BRUSH");
+        eraserItem.setActionCommand("TOOL_ERASER");
+        selectItem.setActionCommand("TOOL_SELECT");
 
-        ButtonGroup lineStyleGroup = new ButtonGroup();
+        // add action listeners
+        lineItem.addActionListener(actionListener);
+        polygonItem.addActionListener(actionListener);
+        fillItem.addActionListener(actionListener);
+        rectangleItem.addActionListener(actionListener);
+        triangleItem.addActionListener(actionListener);
+        circleItem.addActionListener(actionListener);
+        brushItem.addActionListener(actionListener);
+        eraserItem.addActionListener(actionListener);
+        selectItem.addActionListener(actionListener);
 
+        // group tools as radio buttons
         ButtonGroup toolsGroup = new ButtonGroup();
         toolsGroup.add(lineItem);
         toolsGroup.add(polygonItem);
@@ -73,23 +109,10 @@ public class Toolbar {
         toolsGroup.add(triangleItem);
         toolsGroup.add(circleItem);
         toolsGroup.add(brushItem);
+        toolsGroup.add(eraserItem);
+        toolsGroup.add(selectItem);
 
-        lineItem.setActionCommand("TOOL_LINE");
-        polygonItem.setActionCommand("TOOL_POLYGON");
-        fillItem.setActionCommand("TOOL_FILL");
-        rectangleItem.setActionCommand("TOOL_RECTANGLE");
-        triangleItem.setActionCommand("TOOL_TRIANGLE");
-        circleItem.setActionCommand("TOOL_CIRCLE");
-        brushItem.setActionCommand("TOOL_BRUSH");
-
-        lineItem.addActionListener(actionListener);
-        polygonItem.addActionListener(actionListener);
-        fillItem.addActionListener(actionListener);
-        rectangleItem.addActionListener(actionListener);
-        triangleItem.addActionListener(actionListener);
-        circleItem.addActionListener(actionListener);
-        brushItem.addActionListener(actionListener);
-
+        // add tools to menu
         toolsMenu.add(lineItem);
         toolsMenu.add(polygonItem);
         toolsMenu.add(fillItem);
@@ -97,8 +120,14 @@ public class Toolbar {
         toolsMenu.add(triangleItem);
         toolsMenu.add(circleItem);
         toolsMenu.add(brushItem);
+        toolsMenu.add(eraserItem);
+        toolsMenu.add(selectItem);
 
-        // Color menu
+        menuBar.add(toolsMenu);
+    }
+
+    // build color selection menu
+    private void buildColorMenu() {
         JMenu colorMenu = new JMenu("Colors");
         for (int i = 0; i < colorPalette.length; i++) {
             Color color = colorPalette[i];
@@ -111,16 +140,18 @@ public class Toolbar {
             colorItem.setIcon(createColorIcon(color));
             colorMenu.add(colorItem);
         }
+        menuBar.add(colorMenu);
+    }
 
-        // Settings menu
+    // build settings menu with line options
+    private void buildSettingsMenu() {
         JMenu settingsMenu = new JMenu("Settings");
 
-        // Line Width Slider
+        // line width slider panel
         JPanel widthPanel = new JPanel();
         widthPanel.setLayout(new BoxLayout(widthPanel, BoxLayout.Y_AXIS));
         widthPanel.add(new JLabel("Line Width:"));
 
-        widthSlider = new JSlider(1, 20, lineWidth);
         widthSlider.setMajorTickSpacing(5);
         widthSlider.setMinorTickSpacing(1);
         widthSlider.setPaintTicks(true);
@@ -128,46 +159,12 @@ public class Toolbar {
         widthSlider.addChangeListener(e -> fireSettingsChanged());
         widthPanel.add(widthSlider);
 
-        // Line Style ComboBox
-        JPanel stylePanel = new JPanel();
-        stylePanel.setLayout(new BoxLayout(stylePanel, BoxLayout.Y_AXIS));
-        stylePanel.add(new JLabel("Line Style:"));
-
-        String[] lineStyles = {"Solid", "Dotted", "Dashed"};
-        styleComboBox = new JComboBox<>(lineStyles);
-        styleComboBox.addActionListener(e -> fireSettingsChanged());
-        stylePanel.add(styleComboBox);
-
+        // line style combo box panel
         settingsMenu.add(widthPanel);
-        settingsMenu.add(stylePanel);
-
-        // Add menus to menu bar
-        menuBar.add(fileMenu);
-        menuBar.add(editMenu);
-        menuBar.add(toolsMenu);
-        menuBar.add(colorMenu);
         menuBar.add(settingsMenu);
-
-        eraserItem = new JCheckBoxMenuItem("Eraser Tool");
-        toolsGroup.add(eraserItem);
-        eraserItem.setActionCommand("TOOL_ERASER");
-        eraserItem.addActionListener(actionListener);
-        toolsMenu.add(eraserItem);
-
-        selectItem = new JCheckBoxMenuItem("Selection Tool");
-        toolsGroup.add(selectItem);
-        selectItem.setActionCommand("TOOL_SELECT");
-        selectItem.addActionListener(actionListener);
-        toolsMenu.add(selectItem);
     }
 
-    private void createStyleComboBox() {
-        String[] lineStyles = {"Solid", "Dotted", "Dashed"};
-        styleComboBox = new JComboBox<>(lineStyles);
-        styleComboBox.addActionListener(e -> fireSettingsChanged());
-    }
-
-
+    // create color icon for menu items
     private Icon createColorIcon(Color color) {
         int width = 16;
         int height = 16;
@@ -181,46 +178,21 @@ public class Toolbar {
         return new ImageIcon(image);
     }
 
+    // handle color selection change
     private void updateColorSelection() {
         System.out.println("Selected color: " + selectedColor);
     }
 
-    public void setSettingsChangeListener(ActionListener listener) {
-        this.settingsChangeListener = listener;
-    }
-
+    // notify listeners when settings change
     private void fireSettingsChanged() {
-
-        String selectedStyle = (String) styleComboBox.getSelectedItem();
-        switch (selectedStyle) {
-            case "Solid": lineStyle = LineStyle.SOLID; break;
-            case "Dotted": lineStyle = LineStyle.DOTTED; break;
-            case "Dashed": lineStyle = LineStyle.DASHED; break;
-        }
-
         lineWidth = widthSlider.getValue();
-        dottedLine = styleComboBox.getSelectedIndex() == 1;
         if (settingsChangeListener != null) {
             settingsChangeListener.actionPerformed(
                     new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "SETTINGS_CHANGED"));
         }
     }
 
-    public Color getSelectedColor() {
-        return selectedColor;
-    }
-
-    public LineStyle getLineStyle() {
-        return lineStyle;
-    }
-    public int getLineWidth() {
-        return lineWidth;
-    }
-
-    public boolean isDottedLine() {
-        return dottedLine;
-    }
-
+    // helper to add menu items
     private void addMenuItem(JMenu menu, String text, String actionCommand, ActionListener listener) {
         JMenuItem item = new JMenuItem(text);
         item.setActionCommand(actionCommand);
@@ -228,10 +200,27 @@ public class Toolbar {
         menu.add(item);
     }
 
+    // get the menu bar component
     public JMenuBar getMenuBar() {
         return menuBar;
     }
 
+    // get currently selected color
+    public Color getSelectedColor() {
+        return selectedColor;
+    }
+
+    // get current line width
+    public int getLineWidth() {
+        return lineWidth;
+    }
+
+    // set listener for settings changes
+    public void setSettingsChangeListener(ActionListener listener) {
+        this.settingsChangeListener = listener;
+    }
+
+    // set active tool in menu
     public void setActiveTool(String tool) {
         selectItem.setSelected(false);
         lineItem.setSelected(false);

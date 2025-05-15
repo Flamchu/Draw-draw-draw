@@ -11,25 +11,33 @@ import java.util.List;
 
 public class PolygonRasterizer {
     private final LineRasterizerTrivial lineRasterizer;
+    private final LineCanvasRasterizer lineCanvasRasterizer;
 
-    public PolygonRasterizer(Raster raster) {
+    // Initialize with both rasterizers
+    public PolygonRasterizer(Raster raster, LineCanvasRasterizer lineCanvasRasterizer) {
         this.lineRasterizer = new LineRasterizerTrivial(raster);
+        this.lineCanvasRasterizer = lineCanvasRasterizer;
     }
 
-    public void rasterize(Polygon polygon, Color color, LineStyle lineStyle) {
+    // Draw polygon outline using LineCanvasRasterizer with given color, style, and width
+    public void rasterize(Polygon polygon, Color color, LineStyle style, int lineWidth) {
+        if (lineCanvasRasterizer == null) {
+            throw new IllegalStateException("LineCanvasRasterizer is not initialized.");
+        }
+
         List<Point> points = polygon.getPoints();
-        int size = points.size();
+        if (points.size() < 2) return;
 
-        if (size < 2) return;
-
-        for (int i = 0; i < size; i++) {
-            Point p1 = points.get(i);
-            Point p2 = points.get((i + 1) % size);
-            Line line = new Line(p1, p2, color, lineStyle);
-            lineRasterizer.rasterize(line);
+        for (int i = 0; i < points.size(); i++) {
+            Point a = points.get(i);
+            Point b = points.get((i + 1) % points.size());
+            Line line = new Line(a, b, color, style);
+            lineCanvasRasterizer.setLineWidth(lineWidth);
+            lineCanvasRasterizer.rasterizeLine(line);
         }
     }
 
+    // Point-in-polygon test using ray casting algorithm
     public boolean isPointInsidePolygon(Polygon polygon, Point point) {
         List<Point> points = polygon.getPoints();
         int size = points.size();
@@ -43,14 +51,14 @@ public class PolygonRasterizer {
             int xj = points.get(j).getX();
             int yj = points.get(j).getY();
 
-            // Check if the point is on an edge
+            // Point lies exactly on a vertex
             if ((xi == x && yi == y) || (xj == x && yj == y)) {
                 return true;
             }
 
-            // Check if the edge intersects the horizontal ray
+            // Ray-casting logic
             boolean intersect = ((yi > y) != (yj > y)) &&
-                    (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                    (x < (xj - xi) * (y - yi) / (double)(yj - yi) + xi);
             if (intersect) {
                 inside = !inside;
             }

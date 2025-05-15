@@ -9,21 +9,23 @@ public class SelectionTracker {
     private Point dragStart;
     private Point resizePoint;
     private boolean isResizing = false;
-    private int handleSize = 6; // Size of selection handles in pixels
-    private int selectionTolerance = 8; // Pixel tolerance for selection
+    private int handleSize = 6;
+    private int selectionTolerance = 8;
     private boolean hasUncommittedChanges = false;
 
-    // Selection methods
+    // select a single line and clear other selections
     public void selectLine(Line line) {
         clearSelection();
         selectedLines.add(line);
     }
 
+    // select a single polygon and clear other selections
     public void selectPolygon(Polygon polygon) {
         clearSelection();
         selectedPolygons.add(polygon);
     }
 
+    // clear all current selections and reset drag state
     public void clearSelection() {
         selectedLines.clear();
         selectedPolygons.clear();
@@ -32,21 +34,24 @@ public class SelectionTracker {
         isResizing = false;
     }
 
+    // check if any items are currently selected
     public boolean hasSelection() {
         return !selectedLines.isEmpty() || !selectedPolygons.isEmpty();
     }
 
+    // reset the uncommitted changes flag
     public void resetChangeFlag() {
         hasUncommittedChanges = false;
     }
 
-    // Drag operations
+    // start dragging from given coordinates
     public void startDrag(int x, int y) {
         dragStart = new Point(x, y);
         resizePoint = findResizePoint(x, y);
         isResizing = (resizePoint != null);
     }
 
+    // update drag position and handle movement or resizing
     public void updateDrag(int x, int y) {
         if (dragStart == null) return;
 
@@ -63,14 +68,13 @@ public class SelectionTracker {
         hasUncommittedChanges = true;
     }
 
+    // move all selected items by given delta
     private void handleMove(int dx, int dy) {
-        // Move all selected lines
         for (Line line : selectedLines) {
             line.getPoint1().translate(dx, dy);
             line.getPoint2().translate(dx, dy);
         }
 
-        // Move all selected polygons
         for (Polygon polygon : selectedPolygons) {
             for (Point p : polygon.getPoints()) {
                 p.translate(dx, dy);
@@ -78,25 +82,24 @@ public class SelectionTracker {
         }
     }
 
+    // resize selected items from the resize point
     private void handleResize(int dx, int dy) {
         if (resizePoint != null) {
             resizePoint.translate(dx, dy);
 
-            // For lines, ensure the other point stays connected if needed
             if (selectedLines.size() == 1 && selectedPolygons.isEmpty()) {
                 Line line = selectedLines.get(0);
                 if (resizePoint == line.getPoint1()) {
-                    // Optional: Add constraints here if needed
+                    // handle line point1 resize
                 } else if (resizePoint == line.getPoint2()) {
-                    // Optional: Add constraints here if needed
+                    // handle line point2 resize
                 }
             }
         }
     }
 
-    // Hit testing methods
+    // find resize handle near given coordinates
     public Point findResizePoint(int x, int y) {
-        // Check lines first (priority to lines if they overlap)
         for (Line line : selectedLines) {
             if (line.getPoint1().distanceTo(new Point(x, y)) < selectionTolerance) {
                 return line.getPoint1();
@@ -106,7 +109,6 @@ public class SelectionTracker {
             }
         }
 
-        // Check polygons
         for (Polygon polygon : selectedPolygons) {
             for (Point p : polygon.getPoints()) {
                 if (p.distanceTo(new Point(x, y)) < selectionTolerance) {
@@ -117,11 +119,13 @@ public class SelectionTracker {
 
         return null;
     }
-    // Getters for selected items
+
+    // get copy of selected lines list
     public List<Line> getSelectedLines() {
         return new ArrayList<>(selectedLines);
     }
 
+    // get copy of selected polygons list
     public List<Polygon> getSelectedPolygons() {
         return new ArrayList<>(selectedPolygons);
     }
