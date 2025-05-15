@@ -85,10 +85,11 @@ public class App {
             }
             return false;
         });
+
         // setup main window
         frame = new JFrame();
         frame.setLayout(new BorderLayout());
-        frame.setTitle("Delta draw");
+        frame.setTitle("Draw-draw-draw");
         frame.setResizable(true);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
