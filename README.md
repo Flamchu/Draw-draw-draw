@@ -1,7 +1,7 @@
 # Draw-draw-draw 
-**Autor:** Lukáš Levinský  
 **Jazyk:** Java 17+ \
-**Typ projektu:** Desktopová aplikace pro rastrovou grafiku
+**Typ projektu:
+** Desktopová aplikace pro rastrovou grafiku
 
 ---
 
